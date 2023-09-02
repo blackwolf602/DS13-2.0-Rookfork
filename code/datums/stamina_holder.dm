@@ -28,7 +28,7 @@
 	return ..()
 
 /datum/stamina_container/process(delta_time)
-	if(delta_time && is_regenerating && !HAS_TRAIT(parent, TRAIT_HALOPERIDOL))
+	if(delta_time && is_regenerating)
 		current = min(current + (regen_rate*delta_time), maximum)
 	if(delta_time && decrement)
 		current = max(current + (decrement*delta_time), 0)

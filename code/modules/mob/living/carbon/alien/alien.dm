@@ -71,6 +71,9 @@
 	else
 		clear_alert(ALERT_XENO_FIRE)
 
+/mob/living/carbon/alien/reagent_check(datum/reagent/R, delta_time, times_fired) //can metabolize all reagents
+	return FALSE
+
 /mob/living/carbon/alien/get_status_tab_items()
 	. = ..()
 	. += "Combat mode: [combat_mode ? "On" : "Off"]"

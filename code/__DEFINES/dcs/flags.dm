@@ -9,10 +9,7 @@
 #define ELEMENT_INCOMPATIBLE 1
 
 // /datum/element flags
-/// Causes the detach proc to be called when the host object is being deleted.
-/// Should only be used if you need to perform cleanup not related to the host object.
-/// You do not need this if you are only unregistering signals, for instance.
-/// You would need it if you are doing something like removing the target from a processing list.
+/// Causes the detach proc to be called when the host object is being deleted
 #define ELEMENT_DETACH (1 << 0)
 /**
  * Only elements created with the same arguments given after `id_arg_index` share an element instance

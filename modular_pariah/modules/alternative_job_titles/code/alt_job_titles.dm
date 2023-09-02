@@ -12,16 +12,16 @@
 // Heads
 
 /datum/job/research_director
-	alt_titles = list(JOB_RESEARCH_DIRECTOR, "Lead Researcher", "Chief Science Officer")
+	alt_titles = list(JOB_RESEARCH_DIRECTOR, "Lead Researcher")
 
 /datum/job/chief_engineer
 	alt_titles = list(JOB_CHIEF_ENGINEER, "Engineering Foreman", "Head of Engineering")
 
 /datum/job/chief_medical_officer
-	alt_titles = list(JOB_CHIEF_MEDICAL_OFFICER, "Head of Medical", "Senior Physician", "Chief Medical Officer")
+	alt_titles = list(JOB_CHIEF_MEDICAL_OFFICER, "Head of Medical", "Senior Physician")
 
 /datum/job/head_of_personnel
-	alt_titles = list(JOB_HEAD_OF_PERSONNEL, "Personnel Manager", "Crew Overseer", "First Lieutenant")
+	alt_titles = list(JOB_HEAD_OF_PERSONNEL, "Personnel Manager", "Crew Overseer")
 
 /datum/job/head_of_security
 	alt_titles = list(JOB_HEAD_OF_SECURITY, "Security Commander", "Chief of Security")

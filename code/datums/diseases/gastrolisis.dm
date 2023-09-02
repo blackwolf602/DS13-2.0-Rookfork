@@ -3,12 +3,12 @@
 	max_stages = 4
 	spread_text = "Unknown"
 	spread_flags = DISEASE_SPREAD_SPECIAL
-	cure_text = "Salt and ryetalyn"
+	cure_text = "Salt and mutadone"
 	agent = "Agent S and DNA restructuring"
 	viable_mobtypes = list(/mob/living/carbon/human)
 	stage_prob = 0.5
 	disease_flags = CURABLE
-	cures = list(/datum/reagent/consumable/salt,  /datum/reagent/medicine/ryetalyn)
+	cures = list(/datum/reagent/consumable/salt,  /datum/reagent/medicine/mutadone)
 
 
 /datum/disease/gastrolosis/stage_act(delta_time, times_fired)

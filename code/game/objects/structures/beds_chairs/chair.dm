@@ -24,6 +24,8 @@
 
 /obj/structure/chair/Initialize(mapload)
 	. = ..()
+	if(!anchored) //why would you put these on the shuttle?
+		addtimer(CALLBACK(src, PROC_REF(RemoveFromLatejoin)), 0)
 	if(prob(0.2))
 		name = "tactical [name]"
 	MakeRotate()
@@ -33,8 +35,11 @@
 	AddComponent(/datum/component/simple_rotation, ROTATION_IGNORE_ANCHORED|ROTATION_GHOSTS_ALLOWED)
 
 /obj/structure/chair/Destroy()
-	SSjob.latejoin_trackers -= src //These may be here due to the arrivals shuttle
+	RemoveFromLatejoin()
 	return ..()
+
+/obj/structure/chair/proc/RemoveFromLatejoin()
+	SSjob.latejoin_trackers -= src //These may be here due to the arrivals shuttle
 
 /obj/structure/chair/deconstruct(disassembled)
 	// If we have materials, and don't have the NOCONSTRUCT flag

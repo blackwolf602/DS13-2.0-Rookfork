@@ -65,7 +65,8 @@ GLOBAL_DATUM(main_supermatter_engine, /obj/machinery/power/supermatter)
 	var/emergency_color = "#ffd04f"
 	var/rotation_angle = 0
 
-	// Time between delamination ('exploding') and exploding (as in the actual boom)
+	var/grav_pulling = 0
+	// Time in ticks between delamination ('exploding') and exploding (as in the actual boom)
 	var/pull_time = 30 SECONDS
 	var/explosion_power = 9
 
@@ -191,7 +192,7 @@ GLOBAL_DATUM(main_supermatter_engine, /obj/machinery/power/supermatter)
 	if(!air)
 		return SUPERMATTER_ERROR
 
-	if(exploded)
+	if(grav_pulling || exploded)
 		return SUPERMATTER_DELAMINATING
 
 	if(get_integrity_percentage() < 25)
@@ -213,10 +214,10 @@ GLOBAL_DATUM(main_supermatter_engine, /obj/machinery/power/supermatter)
 
 	if(exploded)
 		return
-	AddComponent(/datum/component/singularity, FALSE, 1, CALLBACK(src, PROC_REF(Consume)), TRUE, 20, TRUE, 1, FALSE, 9)
 
 	message_admins("Supermatter delaminating!! [ADMIN_FLW(src)]")
 	anchored = TRUE
+	grav_pulling = 1
 	exploded = 1
 
 	sleep(pull_time)
@@ -227,37 +228,8 @@ GLOBAL_DATUM(main_supermatter_engine, /obj/machinery/power/supermatter)
 
 	var/list/affected_z = SSmapping.get_zstack(TS.z, TRUE)
 
-	// Effect 1: Z-level wide electrical pulse
-	for(var/obj/machinery/power/apc/A in GLOB.machines)
-		CHECK_TICK
-		if(!(A.z in affected_z))
-			continue
-
-		// Overloads lights
-		if(prob(DETONATION_APC_OVERLOAD_PROB))
-			A.overload_lighting()
-		// Causes the APCs to go into system failure mode.
-		var/random_change = rand(100 - DETONATION_SHUTDOWN_RNG_FACTOR, 100 + DETONATION_SHUTDOWN_RNG_FACTOR) / 100
-		A.energy_fail(round(DETONATION_SHUTDOWN_APC * random_change))
-
-	// Effect 2: Break solar arrays
-
-	for(var/obj/machinery/power/solar/S in GLOB.machines)
-		CHECK_TICK
-		if(!(S.z in affected_z))
-			continue
-		if(prob(DETONATION_SOLAR_BREAK_CHANCE))
-			S.atom_break()
-
-	// Effect 3: Medium scale explosion
-	var/datum/gas_mixture/GM = TS.return_air()
-	GM?.removeRatio(100)
-
-	explosion(TS, explosion_power/2, explosion_power, explosion_power * 2, explosion_power * 4, 1)
-	moveToNullspace()
-
-	// Effect 4: Radiation, weakening to all mobs on Z level
-	SSweather.run_weather(/datum/weather/rad_storm, affected_z, TRUE)
+	// Effect 1: Radiation, weakening to all mobs on Z level
+	SSweather.run_weather(/datum/weather/rad_storm, affected_z, FALSE)
 
 	for(var/mob/living/mob in GLOB.mob_living_list)
 		CHECK_TICK
@@ -270,7 +242,32 @@ GLOBAL_DATUM(main_supermatter_engine, /obj/machinery/power/supermatter)
 		mob.Knockdown(DETONATION_MOB_CONCUSSION)
 		to_chat(mob, span_danger("An invisible force slams you against the ground!"))
 
-	qdel(src)
+	// Effect 2: Z-level wide electrical pulse
+	for(var/obj/machinery/power/apc/A in GLOB.machines)
+		CHECK_TICK
+		if(!(A.z in affected_z))
+			continue
+
+		// Overloads lights
+		if(prob(DETONATION_APC_OVERLOAD_PROB))
+			A.overload_lighting()
+		// Causes the APCs to go into system failure mode.
+		var/random_change = rand(100 - DETONATION_SHUTDOWN_RNG_FACTOR, 100 + DETONATION_SHUTDOWN_RNG_FACTOR) / 100
+		A.energy_fail(round(DETONATION_SHUTDOWN_APC * random_change))
+
+	// Effect 3: Break solar arrays
+
+	for(var/obj/machinery/power/solar/S in GLOB.machines)
+		CHECK_TICK
+		if(!(S.z in affected_z))
+			continue
+		if(prob(DETONATION_SOLAR_BREAK_CHANCE))
+			S.atom_break()
+
+	// Effect 4: Medium scale explosion
+	spawn(0)
+		explosion(TS, explosion_power/2, explosion_power, explosion_power * 2, explosion_power * 4, 1)
+		qdel(src)
 
 /obj/machinery/power/supermatter/examine(mob/user)
 	. = ..()
@@ -323,7 +320,7 @@ GLOBAL_DATUM(main_supermatter_engine, /obj/machinery/power/supermatter)
 			public_alert = 1
 			for(var/mob/M in GLOB.player_list)
 				if((is_station_level(M.z)))
-					M.playsound_local(get_turf(M), 'sound/ambience/matteralarm.ogg', 100, FALSE)
+					M.playsound_local(get_turf(M), 'sound/ambience/matteralarm.ogg')
 
 		else if(safe_warned && public_alert)
 			priority_announce(alert_msg, "Station Announcement","Supermatter Monitor", ANNOUNCER_ATTENTION)
@@ -351,6 +348,8 @@ GLOBAL_DATUM(main_supermatter_engine, /obj/machinery/power/supermatter)
 			announce_warning()
 	else
 		shift_light(4,base_color)
+	if(grav_pulling)
+		supermatter_pull(src)
 
 	//Ok, get the air from the turf
 	var/datum/gas_mixture/removed = null
@@ -367,6 +366,8 @@ GLOBAL_DATUM(main_supermatter_engine, /obj/machinery/power/supermatter)
 	if(!env || !removed || !removed.total_moles)
 		damage_archived = damage
 		damage += max((power - 15*power_factor)/10, 0)
+	else if (grav_pulling) //If supermatter is detonating, remove all air from the zone
+		env.remove(env.total_moles)
 	else
 		damage_archived = damage
 
@@ -449,6 +450,50 @@ GLOBAL_DATUM(main_supermatter_engine, /obj/machinery/power/supermatter)
 
 	return 1
 
+/obj/machinery/power/supermatter/Bumped(atom/AM as mob|obj)
+	if(istype(AM, /obj/effect))
+		return
+	if(istype(AM, /mob/living))
+		AM.visible_message(
+			span_warning("[AM] slams into [src], inducing a resonance. For a brief instant, [AM.p_their()] body glows brilliantly, then flashes into ash."),
+			span_userdanger("You slam into [src], and your mind fills with unearthly shrieking. Your vision floods with light as your body instantly dissolves into dust."),
+			span_warning("You hear an unearthly ringing, then what sounds like a shrilling kettle as you are washed with a wave of heat.")
+		)
+	else if(!grav_pulling) //To prevent spam, detonating supermatter does not indicate non-mobs being destroyed
+		AM.visible_message(
+			span_warning("[AM] smacks into [src] and rapidly flashes to ash."),
+			span_warning("You hear a loud crack as you are washed with a wave of heat.")
+		)
+
+	Consume(AM)
+
+/*
+/obj/machinery/power/supermatter/proc/Consume(mob/living/user)
+	if(istype(user))
+		dust_mob(user)
+		power += 200
+	else
+		qdel(user)
+
+	power += 200
+
+	//Some poor sod got eaten, go ahead and irradiate people nearby.
+	var/list/viewers = viewers(src)
+	for(var/mob/living/l in range(10))
+		if(l in viewers)
+			to_chat(l, span_warning("As [src] slowly stops resonating, you feel an intense wave of heat wash over you."))
+		else
+			to_chat(l, span_warning("You hear a muffled, shrill ringing as an intense wave of heat washes over you."))
+	var/rads = 500
+	SSradiation.radiate(src, rads)
+*/
+
+/proc/supermatter_pull(atom/target, pull_range = 255, pull_power = STAGE_FIVE)
+	for(var/atom/A in range(pull_range, target))
+		A.singularity_pull(target, pull_power)
+		CHECK_TICK
+
+
 /obj/machinery/power/supermatter/GotoAirflowDest(n) //Supermatter not pushed around by airflow
 	return
 
@@ -515,6 +560,23 @@ GLOBAL_DATUM(main_supermatter_engine, /obj/machinery/power/supermatter)
 
 	return data
 
+/*
+	data["integrity_percentage"] = round(get_integrity_percentage())
+	var/datum/gas_mixture/env = null
+	var/turf/T = get_turf(src)
+
+	if(istype(T))
+		env = T.return_air()
+
+	if(!env)
+		data["ambient_temp"] = 0
+		data["ambient_pressure"] = 0
+	else
+		data["ambient_temp"] = round(env.temperature)
+		data["ambient_pressure"] = round(env.returnPressure())
+	data["detonating"] = grav_pulling
+	data["energy"] = power
+*/
 
 /obj/machinery/power/supermatter/shard //Small subtype, less efficient and more sensitive, but less boom.
 	name = "supermatter shard"

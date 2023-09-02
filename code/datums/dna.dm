@@ -152,15 +152,15 @@ GLOBAL_LIST_INIT(total_uf_len_by_block, populate_total_uf_len_by_block())
 /datum/dna/proc/check_mutation(mutation_type)
 	return get_mutation(mutation_type)
 
-/datum/dna/proc/remove_all_mutations(list/classes = list(MUT_NORMAL, MUT_EXTRA, MUT_OTHER), ryetalyn = FALSE)
-	remove_mutation_group(mutations, classes, ryetalyn)
+/datum/dna/proc/remove_all_mutations(list/classes = list(MUT_NORMAL, MUT_EXTRA, MUT_OTHER), mutadone = FALSE)
+	remove_mutation_group(mutations, classes, mutadone)
 	scrambled = FALSE
 
-/datum/dna/proc/remove_mutation_group(list/group, list/classes = list(MUT_NORMAL, MUT_EXTRA, MUT_OTHER), ryetalyn = FALSE)
+/datum/dna/proc/remove_mutation_group(list/group, list/classes = list(MUT_NORMAL, MUT_EXTRA, MUT_OTHER), mutadone = FALSE)
 	if(!group)
 		return
 	for(var/datum/mutation/human/HM in group)
-		if((HM.class in classes) && !(HM.ryetalyn_proof && ryetalyn))
+		if((HM.class in classes) && !(HM.mutadone_proof && mutadone))
 			force_lose(HM)
 
 /datum/dna/proc/generate_unique_identity()
@@ -488,7 +488,7 @@ GLOBAL_LIST_INIT(total_uf_len_by_block, populate_total_uf_len_by_block())
 /datum/dna/stored/check_mutation(mutation_name)
 	return
 
-/datum/dna/stored/remove_all_mutations(list/classes, ryetalyn = FALSE)
+/datum/dna/stored/remove_all_mutations(list/classes, mutadone = FALSE)
 	return
 
 /datum/dna/stored/remove_mutation_group(list/group)
@@ -807,7 +807,7 @@ GLOBAL_LIST_INIT(total_uf_len_by_block, populate_total_uf_len_by_block())
 			if(HM)
 				HM.scrambled = TRUE
 				if(HM.quality & resilient)
-					HM.ryetalyn_proof = TRUE
+					HM.mutadone_proof = TRUE
 		return TRUE
 
 /mob/living/carbon/proc/random_mutate_unique_identity()
@@ -886,7 +886,7 @@ GLOBAL_LIST_INIT(total_uf_len_by_block, populate_total_uf_len_by_block())
 	dna.remove_all_mutations()
 	dna.stability = 100
 	if(prob(max(70-instability,0)))
-		switch(rand(0,9)) //not complete and utter death
+		switch(rand(0,10)) //not complete and utter death
 			if(0)
 				monkeyize()
 			if(1)
@@ -901,11 +901,14 @@ GLOBAL_LIST_INIT(total_uf_len_by_block, populate_total_uf_len_by_block())
 				to_chat(src, span_notice("Oh, I actually feel quite alright!")) //you thought
 				physiology.damage_resistance = -20000
 			if(5)
-				apply_status_effect(/datum/status_effect/go_away)
+				to_chat(src, span_notice("Oh, I actually feel quite alright!"))
+				reagents.add_reagent(/datum/reagent/aslimetoxin, 10)
 			if(6)
+				apply_status_effect(/datum/status_effect/go_away)
+			if(7)
 				to_chat(src, span_notice("Oh, I actually feel quite alright!"))
 				ForceContractDisease(new/datum/disease/decloning()) //slow acting, non-viral clone damage based GBS
-			if(7)
+			if(8)
 				var/list/elligible_organs = list()
 				for(var/obj/item/organ/organ as anything in processing_organs) //make sure we dont get an implant or cavity item
 					elligible_organs += organ
@@ -917,7 +920,7 @@ GLOBAL_LIST_INIT(total_uf_len_by_block, populate_total_uf_len_by_block())
 					O.forceMove(drop_location())
 					if(prob(20))
 						O.animate_atom_living()
-			if(8 to 9)
+			if(9 to 10)
 				ForceContractDisease(new/datum/disease/gastrolosis())
 				to_chat(src, span_notice("Oh, I actually feel quite alright!"))
 	else

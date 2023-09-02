@@ -97,7 +97,8 @@
 			span_infoplain(span_green("You apply [src] on [C]'s [parse_zone(affecting.body_zone)]."))
 		)
 		var/previous_damage = affecting.get_damage()
-		affecting.heal_damage(brute, burn)
+		if(affecting.heal_damage(brute, burn))
+			C.update_damage_overlays()
 		post_heal_effects(max(previous_damage - affecting.get_damage(), 0), C, user)
 		return TRUE
 	to_chat(user, span_warning("[C]'s [parse_zone(affecting.body_zone)] can not be healed with [src]!"))
@@ -117,7 +118,7 @@
 	heal_brute = 15
 	self_delay = 4 SECONDS
 	other_delay = 2 SECONDS
-	grind_results = list(/datum/reagent/medicine/bicaridine = 10)
+	grind_results = list(/datum/reagent/medicine/c2/libital = 10)
 	merge_type = /obj/item/stack/medical/bruise_pack
 
 /obj/item/stack/medical/bruise_pack/suicide_act(mob/user)
@@ -255,7 +256,7 @@
 	heal_burn = 5
 	flesh_regeneration = 2.5
 	sanitization = 0.25
-	grind_results = list(/datum/reagent/medicine/kelotane = 10)
+	grind_results = list(/datum/reagent/medicine/c2/lenturi = 10)
 	merge_type = /obj/item/stack/medical/ointment
 
 /obj/item/stack/medical/ointment/suicide_act(mob/living/user)

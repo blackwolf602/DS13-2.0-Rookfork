@@ -18,13 +18,12 @@
 	interaction_flags_machine = INTERACT_MACHINE_WIRES_IF_OPEN | INTERACT_MACHINE_ALLOW_SILICON | INTERACT_MACHINE_OPEN_SILICON | INTERACT_MACHINE_REQUIRES_SILICON | INTERACT_MACHINE_OPEN
 	set_dir_on_move = FALSE
 	auto_dir_align = FALSE
-	loc_procs = EXIT
-
 	var/obj/item/electronics/airlock/electronics = null
 	var/reinf = 0
 	var/shards = 2
 	var/rods = 2
 	var/cable = 1
+	var/list/debris = list()
 
 /obj/machinery/door/window/Initialize(mapload, set_dir, unres_sides)
 	. = ..()
@@ -34,6 +33,12 @@
 	if(LAZYLEN(req_access))
 		icon_state = "[icon_state]"
 		base_state = icon_state
+	for(var/i in 1 to shards)
+		debris += new /obj/item/shard(src)
+	if(rods)
+		debris += new /obj/item/stack/rods(src, rods)
+	if(cable)
+		debris += new /obj/item/stack/cable_coil(src, cable)
 
 	if(unres_sides)
 		//remove unres_sides from directions it can't be bumped from
@@ -48,11 +53,18 @@
 	src.unres_sides = unres_sides
 	update_appearance(UPDATE_ICON)
 
+
+	var/static/list/loc_connections = list(
+		COMSIG_ATOM_EXIT = PROC_REF(on_exit),
+	)
+
+	AddElement(/datum/element/connect_loc, loc_connections)
 	zas_update_loc()
 	become_atmos_sensitive()
 
 /obj/machinery/door/window/Destroy()
 	set_density(FALSE)
+	QDEL_LIST(debris)
 	if(atom_integrity == 0)
 		playsound(src, SFX_SHATTER, 70, TRUE)
 	electronics = null
@@ -106,7 +118,7 @@
 	if(!density && autoclose) //did someone change state while we slept?
 		close()
 
-/obj/machinery/door/window/BumpedBy(atom/movable/AM)
+/obj/machinery/door/window/Bumped(atom/movable/AM)
 	if(operating || !density)
 		return
 	if(!ismob(AM))
@@ -168,8 +180,8 @@
 /obj/machinery/door/window/CanAStarPass(obj/item/card/id/ID, to_dir, no_id = FALSE)
 	return !density || (dir != to_dir) || (check_access(ID) && hasPower() && !no_id)
 
-/obj/machinery/door/window/Exit(atom/movable/leaving, direction)
-	. = ..()
+/obj/machinery/door/window/proc/on_exit(datum/source, atom/movable/leaving, direction)
+	SIGNAL_HANDLER
 	if(leaving.movement_type & PHASING)
 		return
 
@@ -181,7 +193,7 @@
 
 	if(direction == dir && density)
 		leaving.Bump(src)
-		return FALSE
+		return COMPONENT_ATOM_BLOCK_EXIT
 
 /obj/machinery/door/window/open(forced=FALSE)
 	if (operating) //doors can still open when emag-disabled
@@ -236,17 +248,11 @@
 
 /obj/machinery/door/window/deconstruct(disassembled = TRUE)
 	if(!(flags_1 & NODECONSTRUCT_1) && !disassembled)
-		for(var/i in 1 to shards)
-			drop_debris(new /obj/item/shard(src))
-		if(rods)
-			drop_debris(new /obj/item/stack/rods(src, rods))
-		if(cable)
-			drop_debris(new /obj/item/stack/cable_coil(src, cable))
+		for(var/obj/fragment in debris)
+			fragment.forceMove(get_turf(src))
+			transfer_fingerprints_to(fragment)
+			debris -= fragment
 	qdel(src)
-
-/obj/machinery/door/window/proc/drop_debris(obj/item/debris)
-	debris.forceMove(loc)
-	transfer_fingerprints_to(debris)
 
 /obj/machinery/door/window/narsie_act()
 	add_atom_colour("#7D1919", FIXED_COLOUR_PRIORITY)

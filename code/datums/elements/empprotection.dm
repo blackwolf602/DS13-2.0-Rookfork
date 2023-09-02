@@ -1,5 +1,5 @@
 /datum/element/empprotection
-	element_flags = ELEMENT_BESPOKE | ELEMENT_DETACH // Detach for turfs
+	element_flags = ELEMENT_DETACH | ELEMENT_BESPOKE
 	id_arg_index = 2
 	var/flags = NONE
 

@@ -3,9 +3,6 @@
 	desc = "Exclusive only to upper class miners who have passed rigorous training and performed multiple planet cracks."
 	default_skin = "advanced_miner"
 	armor = list(MELEE = 60, BULLET = 60, LASER = 60, ENERGY = 30, BOMB = 80, BIO = 100, FIRE = 25, ACID = 25, WOUND = 5)
-	resistance_flags = FIRE_PROOF|LAVA_PROOF
-	max_heat_protection_temperature = FIRE_SUIT_MAX_TEMP_PROTECT
-	min_cold_protection_temperature = FIRE_SUIT_MIN_TEMP_PROTECT
 	complexity_max = 25
 
 	skins = list(
@@ -38,7 +35,6 @@
 
 /obj/item/mod/control/pre_equipped/ds/advanced_miner
 	theme = /datum/mod_theme/deadspace/advanced_miner
-	applied_core = /obj/item/mod/core/plasma
 	initial_modules = list(
 		/obj/item/mod/module/storage/large_capacity,
 		/obj/item/mod/module/flashlight,

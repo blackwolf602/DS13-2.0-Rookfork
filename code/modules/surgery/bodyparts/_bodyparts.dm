@@ -13,9 +13,6 @@
 	icon_state = "" //Leave this blank! Bodyparts are built using overlays
 	layer = BELOW_MOB_LAYER //so it isn't hidden behind objects when on the floor
 
-	//Default value from 1.0
-	biomass = 2
-
 	VAR_PRIVATE/icon/current_icon = null
 	VAR_PRIVATE/icon/current_aux_icon = null
 
@@ -479,7 +476,8 @@
 			W.heal_damage(heal_amt)
 
 	// sync the bodypart's damage with its wounds
-	return update_damage()
+	if(update_damage())
+		return BODYPART_LIFE_UPDATE_HEALTH
 
 //Applies brute and burn damage to the organ. Returns 1 if the damage-icon states changed at all.
 //Damage will not exceed max_damage using this proc
@@ -525,18 +523,15 @@
 		var/total_damage = brute_dam + burn_dam + burn + brute
 		if(total_damage >= max_damage * LIMB_DISMEMBERMENT_PERCENT)
 			if(attempt_dismemberment(brute, burn, sharpness))
-				return update_damage() || .
+				return update_bodypart_damage_state() || .
 
 
 	//blunt damage is gud at fracturing
-	if(breaks_bones && brute)
-		if(bodypart_flags & BP_BROKEN_BONES)
+	if(breaks_bones)
+		if(brute)
 			jostle_bones(brute)
-			if(prob(20))
-				spawn(-1)
-					owner?.emote("scream")
-		else if((brute_dam + brute > minimum_break_damage) && prob((brute_dam + brute * (1 + !sharpness)) * BODYPART_BONES_BREAK_CHANCE_MOD))
-			break_bones()
+			if((brute_dam + brute > minimum_break_damage) && prob((brute_dam + brute * (1 + !sharpness)) * BODYPART_BONES_BREAK_CHANCE_MOD))
+				break_bones()
 
 
 	if(!damagable)
@@ -582,14 +577,15 @@
 		brute = round(brute * (can_inflict / total_damage),DAMAGE_PRECISION)
 		burn = round(burn * (can_inflict / total_damage),DAMAGE_PRECISION)
 
-	. = update_damage()
+	if(can_inflict <= 0)
+		return FALSE
+
+	update_damage()
 	if(owner)
 		update_disabled()
 		if(updating_health)
 			owner.updatehealth()
-			if(. & BODYPART_LIFE_UPDATE_DAMAGE_OVERLAYS)
-				owner.update_damage_overlays()
-	return .
+	return update_bodypart_damage_state()
 
 //Heals brute and burn damage for the organ. Returns 1 if the damage-icon states changed at all.
 //Damage cannot go below zero.
@@ -611,16 +607,15 @@
 		else
 			brute = W.heal_damage(brute)
 
-	. = update_damage()
+	update_damage()
 
 	if(owner)
 		update_disabled()
 		if(updating_health)
 			owner.updatehealth()
-			if(. & BODYPART_LIFE_UPDATE_DAMAGE_OVERLAYS)
-				owner.update_damage_overlays()
 	cremation_progress = min(0, cremation_progress - ((brute_dam + burn_dam)*(100/max_damage)))
-	return .
+	return update_bodypart_damage_state()
+
 
 ///Proc to hook behavior associated to the change of the brute_dam variable's value.
 /obj/item/bodypart/proc/set_brute_dam(new_value)
@@ -673,18 +668,10 @@
 	brute_ratio = brute_dam / (limb_loss_threshold * 2)
 	burn_ratio = burn_dam / (limb_loss_threshold * 2)
 
-	var/tbrute = round( (brute_dam/max_damage)*3, 1 )
-	var/tburn = round( (burn_dam/max_damage)*3, 1 )
-	if((tbrute != brutestate) || (tburn != burnstate))
-		brutestate = tbrute
-		burnstate = tburn
-		. |= BODYPART_LIFE_UPDATE_DAMAGE_OVERLAYS
-
-	if(old_brute != brute_dam || old_burn != burn_dam)
-		. |= BODYPART_LIFE_UPDATE_HEALTH
-
+	. = (old_brute != brute_dam || old_burn != burn_dam)
 	if(.)
 		refresh_bleed_rate()
+
 
 //Checks disabled status thresholds
 /obj/item/bodypart/proc/update_disabled()
@@ -868,6 +855,19 @@
 
 	set_can_be_disabled(initial(can_be_disabled))
 
+//Updates an organ's brute/burn states for use by update_damage_overlays()
+//Returns 1 if we need to update overlays. 0 otherwise.
+/obj/item/bodypart/proc/update_bodypart_damage_state()
+	SHOULD_CALL_PARENT(TRUE)
+
+	var/tbrute = round( (brute_dam/max_damage)*3, 1 )
+	var/tburn = round( (burn_dam/max_damage)*3, 1 )
+	if((tbrute != brutestate) || (tburn != burnstate))
+		brutestate = tbrute
+		burnstate = tburn
+		return TRUE
+	return FALSE
+
 /obj/item/bodypart/deconstruct(disassembled = TRUE)
 	SHOULD_CALL_PARENT(TRUE)
 
@@ -972,14 +972,6 @@
 
 	if(bandage)
 		bleed_rate *= bandage.absorption_rate_modifier
-
-	var/coag_level = CHEM_EFFECT_MAGNITUDE(owner, CE_ANTICOAGULANT)
-	if(coag_level)
-		if(coag_level > 0)
-			bleed_rate *= 1 + coag_level
-		else
-			bleed_rate *= 0.5 / coag_level
-
 	return bleed_rate
 
 // how much blood the limb needs to be losing per tick (not counting laying down/self grasping modifiers) to get the different bleed icons

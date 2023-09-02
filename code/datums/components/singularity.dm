@@ -46,9 +46,6 @@
 	/// The time that has elapsed since our last move/eat call
 	var/time_since_last_eat
 
-	/// Singularity power to override size.
-	var/override_power
-
 /datum/component/singularity/Initialize(
 	bsa_targetable = TRUE,
 	consume_range = 0,
@@ -58,7 +55,6 @@
 	notify_admins = TRUE,
 	singularity_size = STAGE_ONE,
 	roaming = TRUE,
-	override_power = null,
 )
 	if (!isatom(parent))
 		return COMPONENT_INCOMPATIBLE
@@ -71,7 +67,6 @@
 	src.notify_admins = notify_admins
 	src.roaming = roaming
 	src.singularity_size = singularity_size
-	src.override_power = override_power
 
 /datum/component/singularity/RegisterWithParent()
 	START_PROCESSING(SSsinguloprocess, src)
@@ -107,7 +102,7 @@
 
 /datum/component/singularity/Destroy(force, silent)
 	GLOB.singularities -= src
-	consume_callback = null
+	QDEL_NULL(consume_callback)
 	target = null
 
 	return ..()
@@ -208,7 +203,7 @@
 		if (in_consume_range)
 			consume(src, tile)
 		else
-			tile.singularity_pull(parent, override_power || singularity_size)
+			tile.singularity_pull(parent, singularity_size)
 
 		for (var/atom/movable/thing as anything in tile)
 			if(thing == parent)
@@ -216,7 +211,7 @@
 			if (in_consume_range)
 				consume(src, thing)
 			else
-				thing.singularity_pull(parent, override_power || singularity_size)
+				thing.singularity_pull(parent, singularity_size)
 
 		if(TICK_CHECK) //Yes this means the singulo can eat all of its host subsystem's cpu, but like it's the singulo, and it was gonna do that anyway
 			turfs_to_consume.Cut(1, cached_index + 1)

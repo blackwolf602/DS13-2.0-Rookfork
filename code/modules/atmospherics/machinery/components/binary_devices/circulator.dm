@@ -32,7 +32,7 @@
 
 	var/active = FALSE
 
-/obj/machinery/atmospherics/components/binary/circulator/Initialize()
+/obj/machinery/atmospherics/components/binary/circulator/New()
 	. = ..()
 	airs[2].volume = 400 //The input has a larger volume than the output
 

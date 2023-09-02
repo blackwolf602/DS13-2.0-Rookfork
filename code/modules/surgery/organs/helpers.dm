@@ -45,6 +45,5 @@
 	return returnorg
 
 /mob/living/carbon/getorganslot(slot)
-	RETURN_TYPE(/obj/item/organ)
 	. = organs_by_slot[slot]
 

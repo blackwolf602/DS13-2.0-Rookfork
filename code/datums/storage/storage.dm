@@ -683,8 +683,15 @@ GLOBAL_LIST_EMPTY(cached_storage_typecaches)
 
 	resolve_parent.add_fingerprint(user)
 
+	if(istype(over_object, /atom/movable/screen/inventory/hand))
 
-	if(ismob(over_object))
+		if(resolve_parent.loc != user)
+			return
+
+		var/atom/movable/screen/inventory/hand/hand = over_object
+		user.putItemFromInventoryInHandIfPossible(resolve_parent, hand.held_index)
+
+	else if(ismob(over_object))
 		if(over_object != user)
 			return
 

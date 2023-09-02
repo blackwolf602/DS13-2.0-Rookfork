@@ -38,7 +38,7 @@
 	src.effects_we_clear = typecacheof(effects_we_clear)
 
 /datum/component/effect_remover/Destroy(force, silent)
-	on_clear_callback = null
+	QDEL_NULL(on_clear_callback)
 	return ..()
 
 /datum/component/effect_remover/RegisterWithParent()

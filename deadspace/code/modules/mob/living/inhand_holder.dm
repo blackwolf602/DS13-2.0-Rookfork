@@ -3,7 +3,7 @@
 
 /obj/item/mob_holder/drone/scavbot/deposit(mob/living/target_mob)
 	. = ..()
-	name = "Scavenger bot"
+	name = "scavenger bot"
 	desc = "The drone has folded into a holdable mode"
 	icon = 'deadspace/icons/mob/dsbots.dmi'
 	icon_state = "spiderbot_console"

@@ -48,7 +48,7 @@
 		C.screen -= screen
 	watching = null
 	QDEL_NULL(screen)
-	special_callback = null
+	QDEL_NULL(special_callback)
 	for(var/MM in locked)
 		if(!MM)
 			continue

@@ -124,7 +124,13 @@
 
 /obj/effect/particle_effect/smoke/bad
 	lifetime = 8
-	loc_procs = CROSSED
+
+/obj/effect/particle_effect/smoke/bad/Initialize(mapload)
+	. = ..()
+	var/static/list/loc_connections = list(
+		COMSIG_ATOM_ENTERED = PROC_REF(on_entered),
+	)
+	AddElement(/datum/element/connect_loc, loc_connections)
 
 /obj/effect/particle_effect/smoke/bad/smoke_mob(mob/living/carbon/M)
 	. = ..()
@@ -134,9 +140,12 @@
 		M.emote("cough")
 		return TRUE
 
-/obj/effect/particle_effect/smoke/bad/Crossed(atom/movable/crossed_by, oldloc)
-	if(istype(crossed_by, /obj/projectile/beam))
-		var/obj/projectile/beam/beam = crossed_by
+/obj/effect/particle_effect/smoke/bad/proc/on_entered(datum/source, atom/movable/arrived, atom/old_loc, list/atom/old_locs)
+	SIGNAL_HANDLER
+	if(arrived == src)
+		return
+	if(istype(arrived, /obj/projectile/beam))
+		var/obj/projectile/beam/beam = arrived
 		beam.damage *= 0.5
 
 /datum/effect_system/smoke_spread/bad
@@ -246,8 +255,11 @@
 	if(C.internal != null || C.has_smoke_protection())
 		return FALSE
 	var/fraction = 1/initial(lifetime)
-	reagents.expose(M, VAPOR, fraction*reagents.total_volume)
+	reagents.copy_to(C, fraction*reagents.total_volume)
+	reagents.expose(M, INGEST, fraction)
 	return TRUE
+
+
 
 /datum/effect_system/smoke_spread/chem
 	/// Evil evil hack so we have something to "hold" our reagents

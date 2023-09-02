@@ -191,7 +191,6 @@
 		restore()
 
 /obj/shapeshift_holder/Exited(atom/movable/gone, direction)
-	. = ..()
 	if(stored == gone && !restoring)
 		restore()
 

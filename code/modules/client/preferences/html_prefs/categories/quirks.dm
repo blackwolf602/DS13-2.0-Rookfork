@@ -36,6 +36,7 @@
 			"icon" = initial(quirk.icon),
 			"name" = quirk_name,
 			"value" = initial(quirk.value),
+			"mood" = !!(initial(quirk.quirk_flags) & QUIRK_MOODLET_BASED)
 		)
 
 	. += {"
@@ -48,6 +49,8 @@
 	"}
 
 	for(var/quirk in all_quirks)
+		if(quirk_info[quirk]["mood"] && CONFIG_GET(flag/disable_human_mood))
+			continue
 		if(quirk in user_quirks)
 			continue
 		var/quirk_type ="<span style='color: #AAAAFF'>Neuteral</span>"

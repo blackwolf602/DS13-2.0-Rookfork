@@ -75,9 +75,7 @@
 		var/obj/structure/low_wall/neighbor = locate() in step_turf
 		if(neighbor)
 			continue
-		var/can_area_smooth
-		CAN_AREAS_SMOOTH(src, step_turf, can_area_smooth)
-		if(isnull(can_area_smooth))
+		if(!can_area_smooth(step_turf))
 			continue
 		for(var/atom/movable/movable_thing as anything in step_turf)
 			if(airlock_typecache[movable_thing.type])
@@ -96,16 +94,13 @@
 
 	return ..()
 
-/obj/structure/low_wall/CanAllowThrough(atom/movable/mover, border_dir)
+/obj/structure/low_wall/CanAllowThrough(atom/movable/mover, turf/target)
 	. = ..()
 	if(.)
 		return
 	if(mover.throwing)
 		return TRUE
 	if(locate(/obj/structure/low_wall) in get_turf(mover))
-		return TRUE
-	var/obj/structure/table/T = locate() in get_turf(mover)
-	if(T && T.flipped != TRUE)
 		return TRUE
 
 /obj/structure/low_wall/IsObscured()

@@ -398,12 +398,11 @@
 	taste_description = "something funny"
 	overdose_threshold = 20
 
-/datum/reagent/rat_spit/on_mob_metabolize(mob/living/carbon/C, class)
-	if(class != CHEM_INGEST)
+/datum/reagent/rat_spit/on_mob_metabolize(mob/living/L)
+	..()
+	if(HAS_TRAIT(L, TRAIT_AGEUSIA))
 		return
-	if(HAS_TRAIT(C, TRAIT_AGEUSIA))
-		return
-	to_chat(C, span_notice("This food has a funny taste!"))
+	to_chat(L, span_notice("This food has a funny taste!"))
 
 /datum/reagent/rat_spit/overdose_start(mob/living/M)
 	..()
@@ -412,14 +411,15 @@
 		to_chat(victim, span_userdanger("With this last sip, you feel your body convulsing horribly from the contents you've ingested. As you contemplate your actions, you sense an awakened kinship with rat-kind and their newly risen leader!"))
 		victim.faction |= "rat"
 		victim.vomit()
-	metabolization_rate = 10 * initial(metabolization_rate)
+	metabolization_rate = 10 * REAGENTS_METABOLISM
 
-/datum/reagent/rat_spit/affect_blood(mob/living/carbon/C, removed)
+/datum/reagent/rat_spit/on_mob_life(mob/living/carbon/C)
 	if(prob(15))
 		to_chat(C, span_notice("You feel queasy!"))
-		C.adjust_disgust(3 * removed)
+		C.adjust_disgust(3)
 	else if(prob(10))
 		to_chat(C, span_warning("That food does not sit up well!"))
-		C.adjust_disgust(5 * removed)
+		C.adjust_disgust(5)
 	else if(prob(5))
 		C.vomit()
+	..()

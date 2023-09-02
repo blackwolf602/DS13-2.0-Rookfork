@@ -671,6 +671,11 @@
 	. = ..()
 	set_reagent(reagent_id)
 
+/// Spaceman's Trumpet fragile Polypyrylium Oligomers
+/datum/plant_gene/reagent/preset/polypyr
+	reagent_id = /datum/reagent/medicine/polypyr
+	rate = 0.15
+
 /// Jupitercup's fragile Liquid Electricity
 /datum/plant_gene/reagent/preset/liquidelectricity
 	reagent_id = /datum/reagent/consumable/liquidelectricity/enriched

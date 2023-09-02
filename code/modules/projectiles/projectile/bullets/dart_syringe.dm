@@ -56,9 +56,9 @@
 	. = ..()
 	reagents.add_reagent(/datum/reagent/medicine/haloperidol, 10)
 
-/obj/projectile/bullet/dart/ryetalyn
+/obj/projectile/bullet/dart/mutadone
 	damage = 0
 
-/obj/projectile/bullet/dart/ryetalyn/Initialize(mapload)
+/obj/projectile/bullet/dart/mutadone/Initialize(mapload)
 	. = ..()
-	reagents.add_reagent(/datum/reagent/medicine/ryetalyn, 10)
+	reagents.add_reagent(/datum/reagent/medicine/mutadone, 10)

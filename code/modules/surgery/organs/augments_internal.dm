@@ -3,6 +3,7 @@
 	name = "cybernetic implant"
 	desc = "A state-of-the-art implant that improves a baseline's functionality."
 	visual = FALSE
+	status = ORGAN_ROBOTIC
 	organ_flags = ORGAN_SYNTHETIC
 	var/implant_color = "#FFFFFF"
 	var/implant_overlay
@@ -142,11 +143,11 @@
 	. = ..()
 	if((organ_flags & (ORGAN_FAILING|ORGAN_CUT_AWAY)) || . & EMP_PROTECT_SELF)
 		return
-	set_organ_failing(TRUE)
+	organ_flags |= ORGAN_FAILING
 	addtimer(CALLBACK(src, PROC_REF(reboot)), 90 / severity)
 
 /obj/item/organ/cyberimp/brain/anti_stun/proc/reboot()
-	set_organ_failing(FALSE)
+	organ_flags &= ~ORGAN_FAILING
 
 //[[[[MOUTH]]]]
 /obj/item/organ/cyberimp/mouth

@@ -4,7 +4,7 @@
 	max_bleeding_stage = 0
 
 /datum/wound/burn/bleeding()
-	return FALSE
+	return 0
 
 /datum/wound/burn/moderate
 	stages = list(

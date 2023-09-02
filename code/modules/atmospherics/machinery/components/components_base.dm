@@ -19,15 +19,19 @@
 	///Handles whether the custom reconcilation handling should be used
 	var/custom_reconcilation = FALSE
 
-/obj/machinery/atmospherics/components/Initialize(mapload)
+/obj/machinery/atmospherics/components/New()
 	parents = new(device_type)
 	airs = new(device_type)
+
+	..()
+
 	for(var/i in 1 to device_type)
 		if(airs[i])
 			continue
 		var/datum/gas_mixture/component_mixture = new(initial_volume)
 		airs[i] = component_mixture
 
+/obj/machinery/atmospherics/components/Initialize(mapload)
 	. = ..()
 
 	if(hide)

@@ -154,6 +154,9 @@ PROCESSING_SUBSYSTEM_DEF(quirks)
 		if (isnull(quirk))
 			continue
 
+		if ((initial(quirk.quirk_flags) & QUIRK_MOODLET_BASED) && CONFIG_GET(flag/disable_human_mood))
+			continue
+
 		var/blacklisted = FALSE
 
 		for (var/list/blacklist as anything in quirk_blacklist)

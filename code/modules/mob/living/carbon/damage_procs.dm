@@ -21,12 +21,14 @@
 	switch(damagetype)
 		if(BRUTE)
 			if(BP)
-				BP.receive_damage(damage_amount, 0, sharpness = sharpness)
+				if(BP.receive_damage(damage_amount, 0, sharpness = sharpness))
+					update_damage_overlays()
 			else //no bodypart, we deal damage with a more general method.
 				adjustBruteLoss(damage_amount, forced = forced)
 		if(BURN)
 			if(BP)
-				BP.receive_damage(0, damage_amount, sharpness = sharpness)
+				if(BP.receive_damage(0, damage_amount, sharpness = sharpness))
+					update_damage_overlays()
 			else
 				adjustFireLoss(damage_amount, forced = forced)
 		if(TOX)
@@ -60,7 +62,7 @@
 	if(!forced && (status_flags & GODMODE))
 		return FALSE
 	if(amount > 0)
-		take_overall_damage(amount, 0, updating_health, required_status, can_break_bones = FALSE)
+		take_overall_damage(amount, 0, updating_health, required_status)
 	else
 		heal_overall_damage(abs(amount), 0, required_status ? required_status : BODYTYPE_ORGANIC, updating_health)
 	return amount
@@ -85,10 +87,6 @@
 			blood_volume = max(blood_volume - amount, 0)
 	else if(HAS_TRAIT(src, TRAIT_TOXIMMUNE)) //Prevents toxin damage, but not healing
 		amount = min(amount, 0)
-
-	if(amount > 0) //Not a toxin lover
-		amount *= (1 - (CHEM_EFFECT_MAGNITUDE(src, CE_ANTITOX) * 0.25)) || 1
-
 	return ..()
 
 /mob/living/carbon/pre_stamina_change(diff as num, forced)
@@ -214,7 +212,7 @@
 		update_damage_overlays()
 
 /// damage MANY bodyparts, in random order
-/mob/living/carbon/take_overall_damage(brute = 0, burn = 0, updating_health = TRUE, required_status, can_break_bones = TRUE)
+/mob/living/carbon/take_overall_damage(brute = 0, burn = 0, updating_health = TRUE, required_status)
 	if(status_flags & GODMODE)
 		return //godmode
 	var/list/obj/item/bodypart/parts = get_damageable_bodyparts(required_status)
@@ -228,7 +226,7 @@
 		var/burn_was = picked.burn_dam
 
 
-		update |= picked.receive_damage(brute_per_part, burn_per_part, 0, FALSE, required_status, breaks_bones = can_break_bones)
+		update |= picked.receive_damage(brute_per_part, burn_per_part, 0, FALSE, required_status)
 		brute = round(brute - (picked.brute_dam - brute_was), DAMAGE_PRECISION)
 		burn = round(burn - (picked.burn_dam - burn_was), DAMAGE_PRECISION)
 

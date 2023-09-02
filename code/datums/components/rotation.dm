@@ -75,7 +75,7 @@
 	. = ..()
 
 /datum/component/simple_rotation/Destroy()
-	AfterRotation = null
+	QDEL_NULL(AfterRotation)
 	//Signals + verbs removed via UnRegister
 	. = ..()
 

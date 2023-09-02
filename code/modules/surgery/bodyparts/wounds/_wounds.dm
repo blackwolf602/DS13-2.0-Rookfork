@@ -21,6 +21,8 @@
 	///Amount of damage the current wound type requires(less means we need to apply the next healing stage)
 	var/min_damage = 0
 
+	///Is bandaged?
+	var/bandaged = 0
 	///Is clamped?
 	var/clamped = 0
 	///Is salved?
@@ -112,15 +114,7 @@
 /datum/wound/proc/can_autoheal()
 	if(LAZYLEN(embedded_objects))
 		return FALSE
-
-	switch(wound_type) //OOP is a lie. Should bruises, cuts, and punctures all share a common parent? Probably. Fuck you!
-		if (WOUND_BRUISE, WOUND_CUT, WOUND_PIERCE)
-			if(parent.bandage)
-				return wound_damage() <= initial(autoheal_cutoff)
-		if(WOUND_BURN)
-			. = salved
-
-	. ||= (wound_damage() <= autoheal_cutoff)
+	return (wound_damage() <= autoheal_cutoff) ? TRUE : is_treated()
 
 ///Checks whether the wound has been appropriately treated
 /datum/wound/proc/is_treated()
@@ -129,7 +123,7 @@
 
 	switch(wound_type)
 		if (WOUND_BRUISE, WOUND_CUT, WOUND_PIERCE)
-			return parent.bandage
+			return bandaged
 		if (WOUND_BURN)
 			return salved
 
@@ -182,6 +176,14 @@
 			return prob(dam_coef*10)
 
 	return 0
+
+/datum/wound/proc/bandage()
+	if(bandaged)
+		return FALSE
+	bandaged = 1
+	if(parent)
+		parent.refresh_bleed_rate()
+	return TRUE
 
 /datum/wound/proc/salve()
 	if(salved)
@@ -282,7 +284,7 @@
 			this_wound_desc = "<b>bleeding</b> [this_wound_desc]"
 		else
 			this_wound_desc = "bleeding [this_wound_desc]"
-	else if(parent.bandage)
+	else if(bandaged)
 		this_wound_desc = "bandaged [this_wound_desc]"
 
 	if(germ_level > 600)
@@ -349,7 +351,7 @@
 	return null //no wound
 
 /obj/item/bodypart/proc/attempt_dismemberment(brute as num, burn as num, sharpness)
-	if((sharpness & SHARP_EDGED) && (brute + src.brute_dam) >= max_damage * DROPLIMB_THRESHOLD_EDGE)
+	if((sharpness & SHARP_EDGED) && brute >= max_damage * DROPLIMB_THRESHOLD_EDGE)
 		if(prob(brute))
 			return dismember(DROPLIMB_EDGE, FALSE, FALSE)
 

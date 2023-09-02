@@ -6,7 +6,6 @@
 	has_gravity = STANDARD_GRAVITY
 	area_flags = VALID_TERRITORY | UNIQUE_AREA | FLORA_ALLOWED | CULT_PERMITTED
 	ambient_buzz = 'sound/ambience/magma.ogg'
-	ambient_buzz_vol = 35
 
 /area/mine/explored
 	name = "Mine"
@@ -107,7 +106,6 @@
 	area_flags = VALID_TERRITORY | UNIQUE_AREA | FLORA_ALLOWED
 	sound_environment = SOUND_AREA_LAVALAND
 	ambient_buzz = 'sound/ambience/magma.ogg'
-	ambient_buzz_vol = 35
 
 /area/lavaland/surface
 	name = "Lavaland"
@@ -164,7 +162,6 @@
 	area_flags = UNIQUE_AREA | FLORA_ALLOWED
 	sound_environment = SOUND_AREA_ICEMOON
 	ambient_buzz = 'sound/ambience/magma.ogg'
-	ambient_buzz_vol = 35
 
 /area/icemoon/surface
 	name = "Icemoon"

@@ -30,6 +30,9 @@
 	clear_alert(ALERT_TOO_MUCH_CO2)
 	clear_alert(ALERT_NOT_ENOUGH_CO2)
 
+	SEND_SIGNAL(src, COMSIG_CLEAR_MOOD_EVENT, "chemical_euphoria")
+	SEND_SIGNAL(src, COMSIG_CLEAR_MOOD_EVENT, "smell")
+	SEND_SIGNAL(src, COMSIG_CLEAR_MOOD_EVENT, "suffocation")
 /**
  * On gain of TRAIT_NOMETABOLISM
  *
@@ -43,7 +46,6 @@
 	reagents.end_metabolization(keep_liverless = TRUE)
 
 /mob/living/carbon/proc/on_softcrit_gain(datum/source)
-	ADD_TRAIT(src, TRAIT_NO_SPRINT, STAT_TRAIT)
 	stamina.maximum -= 100
 	stamina.regen_rate -= 5
 	stamina.process()
@@ -51,7 +53,6 @@
 	add_movespeed_modifier(/datum/movespeed_modifier/carbon_softcrit)
 
 /mob/living/carbon/proc/on_softcrit_loss(datum/source)
-	REMOVE_TRAIT(src, TRAIT_NO_SPRINT, STAT_TRAIT)
 	stamina.maximum += 100
 	stamina.regen_rate += 5
 	stamina.process()

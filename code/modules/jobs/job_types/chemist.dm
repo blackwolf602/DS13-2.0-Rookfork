@@ -35,8 +35,11 @@
 		/datum/job_department/medical,
 	)
 
+	family_heirlooms = list(/obj/item/book/manual/wiki/chemistry, /obj/item/ph_booklet)
+
 	mail_goodies = list(
 		/obj/item/reagent_containers/glass/bottle/flash_powder = 15,
+		/obj/item/reagent_containers/glass/bottle/exotic_stabilizer = 5,
 		/obj/item/reagent_containers/glass/bottle/leadacetate = 5,
 		/obj/item/paper/secretrecipe = 1
 	)
@@ -55,7 +58,12 @@
 	ears = /obj/item/radio/headset/headset_med
 	glasses = /obj/item/clothing/glasses/science
 	shoes = /obj/item/clothing/shoes/sneakers/white
-	r_pocket = /obj/item/reagent_containers/syringe
+	l_pocket = /obj/item/reagent_containers/glass/bottle/random_buffer
+	r_pocket = /obj/item/reagent_containers/dropper
+
+	backpack = /obj/item/storage/backpack/chemistry
+	satchel = /obj/item/storage/backpack/satchel/chem
+	duffelbag = /obj/item/storage/backpack/duffelbag/chemistry
 
 	box = /obj/item/storage/box/survival/medical
 	chameleon_extras = /obj/item/gun/syringe
