@@ -8,6 +8,8 @@
 	bloodiness = BLOOD_AMOUNT_PER_DECAL
 	beauty = -100
 	clean_type = CLEAN_TYPE_BLOOD
+	//Default value from 1.0
+	biomass = 0.2
 	var/smell_type =  /datum/component/smell/strong
 	var/should_dry = TRUE
 	var/dryname = "dried blood" //when the blood lasts long enough, it becomes dry and gets a new name
@@ -143,9 +145,9 @@
 /obj/effect/decal/cleanable/blood/gibs/ex_act(severity, target)
 	return FALSE
 
-/obj/effect/decal/cleanable/blood/gibs/on_entered(datum/source, atom/movable/L)
-	if(isliving(L) && has_gravity(loc))
-		playsound(loc, 'sound/effects/gib_step.ogg', HAS_TRAIT(L, TRAIT_LIGHT_STEP) ? 20 : 50, TRUE)
+/obj/effect/decal/cleanable/blood/gibs/Crossed(atom/movable/crossed_by, oldloc)
+	if(isliving(crossed_by) && crossed_by.has_gravity(loc))
+		playsound(loc, 'sound/effects/gib_step.ogg', HAS_TRAIT(crossed_by, TRAIT_LIGHT_STEP) ? 20 : 50, TRUE)
 	. = ..()
 
 /obj/effect/decal/cleanable/blood/gibs/proc/on_pipe_eject(atom/source, direction)

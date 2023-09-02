@@ -208,7 +208,7 @@ GLOBAL_LIST_EMPTY(security_officer_distribution)
 	id_trim = /datum/id_trim/job/security_officer
 	uniform = /obj/item/clothing/under/rank/security/ds_pcsi
 	suit = /obj/item/clothing/suit/armor/pcsi
-	suit_store = /obj/item/gun/energy/disabler
+	suit_store = /obj/item/gun/ballistic/automatic/pistol/divet/rb
 	backpack_contents = list(
 		/obj/item/evidencebag = 1,
 		)
@@ -219,10 +219,6 @@ GLOBAL_LIST_EMPTY(security_officer_distribution)
 	shoes = /obj/item/clothing/shoes/combat/pcsi
 	l_pocket = /obj/item/restraints/handcuffs
 	r_pocket = /obj/item/assembly/flash/handheld
-
-	backpack = /obj/item/storage/backpack/security
-	satchel = /obj/item/storage/backpack/satchel/sec
-	duffelbag = /obj/item/storage/backpack/duffelbag/sec
 
 	box = /obj/item/storage/box/survival/security
 	chameleon_extras = list(
